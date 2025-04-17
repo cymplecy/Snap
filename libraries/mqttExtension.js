@@ -20,7 +20,7 @@
  * V1.7.2 02Mar2025 Added the public HiveMQ broker to the list 
  * V1.7.3 12Mar2025 Slight bux fix to Base64 code 
  * V1.7.4 18Mar2025 Another small bugfix to Base64 code
- * V1.7.5 176Apr2025 Change Base64 unicode string handling
+ * V1.7.5 17Apr2025 Change Base64 unicode string handling
  */
 
 
