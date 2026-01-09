@@ -145,6 +145,7 @@ SnapExtensions.primitives.set(
 		/* adapted into extension by cymplecy 26Nov21 */
         /* modified 13OCt2023 by cymplecy to return binary data as a list */
 		/* modified 11Jul2024 by pixavier to add paramete	 for qos */
+		/* modified 5Jan2025 by cymplecy to ad autodecoding of payload */
 		function log(txt) {
 			console.log('mqt_sub: ', new Date().toString(), txt);
 		}
@@ -168,6 +169,10 @@ SnapExtensions.primitives.set(
 		if (options['qos']) {
 			opts.qos = Number(options['qos']);
 		}
+		if (options['autodecode'] === '') {
+			options['autodecode'] = true;
+		}
+
 
 		let stage =  this.parentThatIsA(StageMorph);
 
@@ -188,11 +193,41 @@ SnapExtensions.primitives.set(
 		let mqttListener = function (aTopic, payload) {
 			if (!mqttWildcard(aTopic, topic)) {return;}
 			let p = new Process();
-			if (options['mode'] && options['mode'] == true) {
-				newPayload = new List(payload);
-			} else {
-				newPayload = payload.toString();
-			}
+//			if (options['mode'] && options['mode'] == true) {
+//				newPayload = new List(payload);
+//			} else {
+				if (options['autodecode'] === true) {
+					if (payload.toString() === 'true') {
+						newPayload = btoa(unescape(encodeURIComponent(payload.toString())));
+					} else if (payload.toString() === 'false') {
+						newPayload = btoa(unescape(encodeURIComponent(payload.toString())));
+					} else if (payload.toString().startsWith('data:image/png;base64')) {
+						newPayload = payload.toString();
+					} else if (payload.toString().startsWith('data:audio/mpeg;base64')) {
+						newPayload = payload.toString();
+					} else {
+						try {
+							if (options['mode'] && options['mode'] == true) {
+								newPayload = new List(Array.from(payload));
+								newPayload = newPayload.map(item => btoa(unescape(encodeURIComponent(item))));
+							} else {
+								newPayload = new Process.prototype.parseJSON(payload.toString());
+								newPayload = newPayload.map(item => btoa(unescape(encodeURIComponent(item))));
+							}
+						}
+						catch (e)
+						{
+							newPayload = btoa(unescape(encodeURIComponent(payload.toString())));
+						}
+					}
+				} else {
+					if (options['mode'] && options['mode'] == true) {
+						newPayload = new List(payload);
+					} else {
+						newPayload = payload.toString();
+					}
+				}
+//			}
 
 			try {
 				p.initializeFor(callback, new List([newPayload, aTopic]));
@@ -541,3 +576,4 @@ var Base64Binary = {
 		return uarray;	
 	}
 }
+
