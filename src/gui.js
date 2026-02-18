@@ -8291,8 +8291,8 @@ IDE_Morph.prototype.looksMenuData = function () {
     );
     menu.addPreference(
         'Blocks only',
-        () => this.hideSpritePanes(!this.config.noSprites),
-        this.config.noSprites,
+        () => this.hideSpritePanes(!this.scene.hideSprites),
+        this.scene.hideSprites,
         'uncheck to show\nthe stage and\nsprite editor panes',
         'check to hide\nthe stage and \nsprite editor panes'
     );
@@ -8721,15 +8721,16 @@ IDE_Morph.prototype.setStageExtent = function (aPoint) {
 // microworlds, experimental in v12, not sure if this is a good idea - jens
 
 IDE_Morph.prototype.hideSpritePanes = function (choice = true) {
-    this.config.noSprites = (choice === true);
-    if (this.config.noSprites) {
+    this.scene.hideSprites = (choice === true);
+    if (this.scene.hideSprites) {
+        this.config.noSprites = true;
         this.applyPaneHidingConfigurations();
         this.controlBar.stageSizeButton.hide();
         this.controlBar.appModeButton.hide();
         this.controlBar.startButton.hide();
         this.fixLayout();
     } else {
-        delete this.config.noSpriteEdits;
+        this.config.noSprites = false;
         this.config.noSpriteEdits = false;
         this.controlBar.stageSizeButton.show();
         this.controlBar.appModeButton.show();

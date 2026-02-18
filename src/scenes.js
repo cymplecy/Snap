@@ -53,7 +53,7 @@ normalizeCanvas, SnapSerializer, Costume, ThreadManager, IDE_Morph*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.scenes = '2026-January-04';
+modules.scenes = '2026-February-18';
 
 // Projecct /////////////////////////////////////////////////////////
 
@@ -125,6 +125,7 @@ function Scene(aStageMorph) {
     this.role = null; // null (default), "template" or "tutorial"
     this.createdFromTemplate = false;
     this.template = null; // {name: str, version: str, hide: nested list}
+    this.hideSprites = false;
 
     // cached IDE state
     this.sprites = new List();

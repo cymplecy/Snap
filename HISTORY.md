@@ -97,6 +97,7 @@
 
 ### 2026-02-18
 * gui: added "Blocks only" setting to the "looks" menu - hides the stage and all sprite editing panes for custom "functions-first" microworlds
+* scenes, gui: made "hideSprites" a separate scene setting
 
 ### 2026-02-13
 * morphic: tweaked GrayPaletteMorph to allow easer selection of pure black / white colors
