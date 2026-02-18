@@ -7390,7 +7390,7 @@ IDE_Morph.prototype.switchToScene = function (
     scene.applyGlobalSettings();
     this.selectSprite(this.scene.currentSprite, true);
     this.corral.album.updateSelection();
-    this.fixLayout();
+    this.hideSpritePanes(this.scene.hideSprites); // this.fixLayout();
     this.corral.album.contents.children.forEach(function (morph) {
         if (morph.state) {
             morph.scrollIntoView();
@@ -7409,7 +7409,7 @@ IDE_Morph.prototype.switchToScene = function (
         this.currentSprite.palette(this.currentCategory);
         this.refreshPalette(true);
     }
-    this.toggleAppMode(appMode);
+    this.toggleAppMode(appMode && !this.scene.hideSprites);
     this.controlBar.stopButton.refresh();
     this.world().keyboardFocus = this.stage;
     this.autoLoadExtensions();
