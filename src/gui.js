@@ -87,7 +87,7 @@ HatBlockMorph, ZOOM*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.gui = '2026-Februars-13';
+modules.gui = '2026-Februars-18';
 
 // Declarations
 
@@ -1003,6 +1003,9 @@ IDE_Morph.prototype.applyPaneHidingConfigurations = function () {
 
     // no sprites
     if (cnf.noSprites) {
+        this.controlBar.stageSizeButton.hide();
+        this.controlBar.appModeButton.hide();
+        this.controlBar.startButton.hide();
         this.stage.hide();
         cnf.noSpriteEdits = true;
     }
@@ -8286,6 +8289,13 @@ IDE_Morph.prototype.looksMenuData = function () {
         'uncheck to turn\nblock clicking\nsound off',
         'check to turn\nblock clicking\nsound on'
     );
+    menu.addPreference(
+        'Blocks only',
+        () => this.hideSpritePanes(!this.config.noSprites),
+        this.config.noSprites,
+        'uncheck to show\nthe stage and\nsprite editor panes',
+        'check to hide\nthe stage and \nsprite editor panes'
+    );
     return menu;
 };
 
@@ -8704,6 +8714,32 @@ IDE_Morph.prototype.setStageExtent = function (aPoint) {
         this.stage.clearPenTrails();
         this.fixLayout();
         this.setExtent(world.extent());
+    }
+};
+
+// IDE_Morph - hiding the sprites & stage related panes for "functions-first"
+// microworlds, experimental in v12, not sure if this is a good idea - jens
+
+IDE_Morph.prototype.hideSpritePanes = function (choice = true) {
+    this.config.noSprites = (choice === true);
+    if (this.config.noSprites) {
+        this.applyPaneHidingConfigurations();
+        this.controlBar.stageSizeButton.hide();
+        this.controlBar.appModeButton.hide();
+        this.controlBar.startButton.hide();
+        this.fixLayout();
+    } else {
+        delete this.config.noSpriteEdits;
+        this.config.noSpriteEdits = false;
+        this.controlBar.stageSizeButton.show();
+        this.controlBar.appModeButton.show();
+        this.controlBar.startButton.show();
+        this.spriteBar.show();
+        this.stageHandle.show();
+        this.stage.show();
+        this.corralBar.show();
+        this.corral.show();
+        this.fixLayout();
     }
 };
 

@@ -95,6 +95,9 @@
     * Catalan, thanks, Joan!
     * German
 
+### 2026-02-18
+* gui: added "Blocks only" setting to the "looks" menu - hides the stage and all sprite editing panes for custom "functions-first" microworlds
+
 ### 2026-02-13
 * morphic: tweaked GrayPaletteMorph to allow easer selection of pure black / white colors
 * blocks: added a black-gray-white palette to the bottom of the color picker for color input slots
