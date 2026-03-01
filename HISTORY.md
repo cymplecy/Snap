@@ -104,6 +104,9 @@
     * Catalan, thanks, Joan!
     * German
 
+### 2026-02-28
+* added  (equilateral) triangles to the shapes library
+
 ### 2026-02-27
 * threads: metaprogramming support for the ADT slot
 * blocks, extensions: enable exporting custom graphical ADT representations from result balloons and speech bubbles
