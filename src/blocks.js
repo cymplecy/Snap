@@ -164,7 +164,7 @@ CustomHatBlockMorph, GrayPaletteMorph, ZOOM*/
 
 // Global stuff ////////////////////////////////////////////////////////
 
-modules.blocks = '2026-March-10';
+modules.blocks = '2026-June-03';
 
 var SyntaxElementMorph;
 var BlockMorph;
@@ -336,7 +336,7 @@ SyntaxElementMorph.prototype.labelParts = {
     },
     '%txt': {
         type: 'input',
-        tags: 'landscape'
+        tags: 'textual' // 'landscape'
     },
     '%anyUE': {
         type: 'input',
@@ -849,6 +849,7 @@ SyntaxElementMorph.prototype.labelParts = {
     },
     '%typ': {
         type: 'input',
+        tags: 'textual',
         // tags: 'read-only static',
         menu: 'typesMenu'
     },
@@ -939,9 +940,11 @@ SyntaxElementMorph.prototype.labelParts = {
             'global?': ['global?'],
             'expression': ['expression'],
             'type': ['type'],
+            'answer': ['answer'],
             'scope': ['scope'],
             'selector': ['selector'],
             'slots': ['slots'],
+            'strict': ['strict'],
             '~' : null,
             'defaults': ['defaults'],
             'menus' : ['menus'],
@@ -967,9 +970,11 @@ SyntaxElementMorph.prototype.labelParts = {
             'comment': ['comment'],
             'category': ['category'],
             'type': ['type'],
+            'answer': ['answer'],
             'scope': ['scope'],
             'selector': ['selector'],
             'slots': ['slots'],
+            'strict': ['strict'],
             '~' : null,
             'defaults': ['defaults'],
             'menus' : ['menus'],
@@ -1287,7 +1292,7 @@ SyntaxElementMorph.prototype.labelParts = {
     },
     '%words': {
         type: 'multi',
-        slots: '%s',
+        slots: '%txt', // '%s'
         defaults: 2
     },
     '%lists': {
@@ -1495,6 +1500,7 @@ SyntaxElementMorph.prototype.allInputs = function () {
 SyntaxElementMorph.prototype.allBlockInputs = function () {
     var all = [];
     this.inputs().forEach(m => {
+        all.push(m);
         all = all.concat(m.allInputs());
     });
     return all;
@@ -2114,7 +2120,7 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
 
         // apply the tags
         // ---------------
-        // input: numeric, numstring, alphanum, read-only, unevaluated,
+        // input: numeric, textual, numstring, alphanum, read-only, unevaluated,
         //        landscape, static
         // text entry: monospace
         // boolean: unevaluated, static
@@ -2135,6 +2141,9 @@ SyntaxElementMorph.prototype.labelPart = function (spec) {
                     switch (tag) {
                     case 'numeric':
                         part.isNumeric = true;
+                        break;
+                    case 'textual':
+                        part.isTextual = true;
                         break;
                     case 'alphanum':
                         part.isNumeric = true;
@@ -2914,6 +2923,11 @@ SyntaxElementMorph.prototype.showBubble = function (value, exportPic, target) {
 
     bubble.step = () => {
         var pos, area;
+
+        if (wrrld.hand.inputTarget instanceof HandleMorph) {
+            // pause while resizing
+            return;
+        }
 
         if (ide && (ide.currentSprite !== target)) {
             pos = anchor.center();
@@ -8551,6 +8565,10 @@ RingMorph.prototype.isEmptySlot = function () {
         (this.getSlotSpec().indexOf('Ring') > 0);
 };
 
+RingMorph.prototype.matches = function (typestring) {
+    return ['command', 'script', 'any'].includes(typestring);
+};
+
 // RingMorph zebra coloring
 
 RingMorph.prototype.fixBlockColor = function (nearest, isForced) {
@@ -11198,6 +11216,7 @@ InputSlotMorph.prototype.init = function (
     this.choices = choiceDict || null; // object, function or selector
     this.oldContentsExtent = contents.extent();
     this.isNumeric = isNumeric || false;
+    this.isTextual = false;
     this.evaluateAsString = false; // special case for RANDOM NUMBER reporter
     this.isAlphanumeric = false; // temporary override for allowing text
     this.isReadOnly = isReadOnly || false;
@@ -11223,6 +11242,8 @@ InputSlotMorph.prototype.getSpec = function () {
     }
     if (this.isNumeric) {
         return '%n';
+    } else if (this.isTextual) {
+        return '%txt';
     }
     return '%s'; // default
 };
@@ -11367,6 +11388,7 @@ InputSlotMorph.prototype.menuFromDict = function (
 	function update(num) {
     	myself.setContents(num);
         myself.reactToSliderEdit();
+        myself.reactToEdit();
         if (trgt && !block.isTemplate) {
             trgt.recordUserEdit(
                 'scripts',
@@ -12317,7 +12339,10 @@ InputSlotMorph.prototype.pianoKeyboardMenu = function (searching) {
         instrument = block.scriptTarget().instrument;
     }
     menu = new PianoMenuMorph(
-        this.setContents,
+        (value) => {
+            this.setContents(value);
+            this.reactToEdit();
+        },
         this,
         this.fontSize,
         instrument
@@ -12326,7 +12351,7 @@ InputSlotMorph.prototype.pianoKeyboardMenu = function (searching) {
         this.right() - (menu.width() / 2),
         this.bottom()
     ));
-    menu.selectKey(Math.min(Math.max(+this.evaluate(), 0), 143));
+    menu.selectKey(Math.min(Math.max(+this.evaluate() || 0, 0), 143));
 };
 
 InputSlotMorph.prototype.directionDialMenu = function (searching) {
@@ -12694,6 +12719,8 @@ InputSlotMorph.prototype.isEmptySlot = function () {
 InputSlotMorph.prototype.matches = function (typestring) {
     if (this.isNumeric) {
         return ['number', 'any'].includes(typestring);
+    } else if (this.isTextual) {
+        return ['text', 'number', 'any'].includes(typestring);
     }
     return true;
 };
@@ -14126,10 +14153,7 @@ TextSlotMorph.prototype.init = function (
 // TextSlotMorph accessing:
 
 TextSlotMorph.prototype.getSpec = function () {
-    if (this.isNumeric) {
-        return '%mlt';
-    }
-    return '%mlt'; // default
+    return '%mlt';
 };
 
 TextSlotMorph.prototype.contents = function () {
@@ -14341,7 +14365,7 @@ ADT_SlotMorph.prototype.init = function (typeString) {
     contents.isEditable = false;
     contents.isDraggable = false;
     contents.disableSelecting();
-    this.setContents(typeString || 'ADT');
+    this.setContents(typeString || 'type');
     this.fixLayout();
 };
 
@@ -14351,7 +14375,7 @@ ADT_SlotMorph.prototype.getSpec = function () {
 
 ADT_SlotMorph.prototype.contents = InputSlotMorph.prototype.contents;
 
-ADT_SlotMorph.prototype.setContents = function (typeString = 'ADT') {
+ADT_SlotMorph.prototype.setContents = function (typeString = 'type') {
     var cnts = this.contents(),
         block = this.parentThatIsA(BlockMorph); // could be inside a multi-arg
     cnts.text = typeString;
@@ -15366,6 +15390,61 @@ MultiArgMorph.prototype.defaultValueDataFor = function (index) {
         return dflt[index] || '';
     }
     return index ? '' : dflt;
+};
+
+// MultiArgMorph restoring inputs:
+
+MultiArgMorph.prototype.restoreInputsFrom = function (oldInputs) {
+    // try to restore my previous inputs when my spec has been changed
+
+    var newInputs = this.inputs(),
+        len = Math.max(oldInputs.length, newInputs.length),
+        scripts = this.parentThatIsA(ScriptsMorph),
+        old,
+        inp,
+        i;
+
+    function preserve(item) {
+        // keep unused blocks around in the scripting area
+        if (item instanceof CSlotMorph ) {
+            item = item.evaluate();
+        }
+        if (item instanceof BlockMorph && scripts) {
+            scripts.add(item);
+            item.moveBy(new Point(20, 20));
+            item.fixBlockColor();
+        }
+    }
+
+    for (i = 0; i < len; i += 1) {
+        inp = newInputs[i];
+        old = oldInputs[i];
+        if (old instanceof ArgLabelMorph) {
+            old = old.argMorph();
+        }
+        if (old instanceof ReporterBlockMorph && inp &&
+                (!(inp instanceof TemplateSlotMorph))) {
+            this.replaceInput(inp, old.fullCopy());
+        } else if (old instanceof InputSlotMorph &&
+                inp instanceof InputSlotMorph) {
+            if (old.isEmptySlot()) {
+                inp.setContents('');
+            } else {
+                inp.setContents(old.evaluate());
+            }
+        } else if (old instanceof BooleanSlotMorph &&
+                inp instanceof BooleanSlotMorph) {
+            inp.setContents(old.evaluate());
+        } else if (old instanceof TemplateSlotMorph &&
+                inp instanceof TemplateSlotMorph) {
+            inp.setContents(old.evaluate());
+        } else if (old instanceof CSlotMorph &&
+                inp instanceof CSlotMorph) {
+            inp.nestedBlock(old.evaluate());
+        } else {
+            preserve(old);
+        }
+    }
 };
 
 // MultiArgMorph events:
